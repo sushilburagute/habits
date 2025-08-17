@@ -16,7 +16,7 @@ export const Header = () => {
     "text-white bg-transparent font-thin hover:bg-white/10 hover:backdrop-blur-md hover:text-white px-2 py-1 rounded-md";
   return (
     <header className="flex justify-between mt-12">
-      <div className="text-white font-bold">habits</div>
+      <div className="text-white font-bold font-mono">habits</div>
       <div>
         <ul className="flex justify-between gap-2">
           {links.map((route, index) => {

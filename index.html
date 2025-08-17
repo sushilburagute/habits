@@ -1,10 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>habits - sush.dev</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>habits - Visual Streaks Habit Tracker</title>
+    <meta
+      name="description"
+      content="Gamify daily habits with a GitHub-like heatmap and addictive streak animations. 100 percent local. Offline-first PWA."
+    />
+    <link rel="canonical" href="https://your-domain.tld/" />
+
+    <!-- PWA basics -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="application-name" content="Habits" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Habits" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)" />
+
+    <!-- Icons -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon-180.png" sizes="180x180" />
+    <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#0f172a" />
+    <meta name="msapplication-TileColor" content="#0f172a" />
+
+    <!-- Social cards -->
+    <meta property="og:site_name" content="Habits" />
+    <meta property="og:title" content="Habits - Visual Streaks Habit Tracker" />
+    <meta
+      property="og:description"
+      content="Track habits with a pretty heatmap and smooth streak animations. Works fully offline."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://habits.sush.dev/" />
+    <!-- <meta property="og:image" content="https://your-domain.tld/og.png" /> -->
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Habits - Visual Streaks Habit Tracker" />
+    <meta
+      name="twitter:description"
+      content="GitHub-like heatmap. Offline-first. No accounts. Just streaks."
+    />
+    <!-- <meta name="twitter:image" content="https://your-domain.tld/og.png" /> -->
+
+    <!-- SEO hygiene -->
+    <meta name="robots" content="index,follow" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Optional performance hints -->
+    <!-- <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /> -->
+    <!-- <link rel="preload" href="/fonts/Inter-var.woff2" as="font" type="font/woff2" crossorigin /> -->
+
+    <!-- JSON-LD for a simple web app -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Habits",
+        "applicationCategory": "LifestyleApplication",
+        "operatingSystem": "Web",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "description": "Offline-first habit tracker with a visual heatmap and streak animations."
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
