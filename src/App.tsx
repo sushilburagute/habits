@@ -5,7 +5,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 
 function App() {
   return (
-    <ThemeProvider>
+    <ThemeProvider defaultTheme="dark" storageKey="ui-theme">
       <AppProvider>
         <Container>
           <Header />
