@@ -1,54 +1,92 @@
 import clsx from "clsx";
+import { Menu, PlusIcon } from "lucide-react";
+
 import { links } from "../constants/links";
 import { useAppContext, type Route } from "../contexts/AppContext";
-import { Button } from "./ui/button";
-import { PlusIcon } from "lucide-react";
+import { BackupMenu } from "./BackupMenu";
+import { WorkspaceMenu } from "./WorkspaceMenu";
 import { ThemeToggle } from "./ThemeToggle";
+import { Button } from "./ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
-export const Header = () => {
+type HeaderProps = {
+  onCreateRequest: () => void;
+};
+
+export const Header = ({ onCreateRequest }: HeaderProps) => {
   const { state, dispatch } = useAppContext();
-
-  console.log(state);
 
   function linkHandler(link: Route) {
     dispatch({ type: "SET_ROUTE", payload: { route: link } });
   }
 
-  const selectedStyle =
-    "px-2 py-1 rounded-md backdrop-blur-md " +
-    "bg-black/10 text-black dark:bg-white/10 dark:text-white " +
-    "hover:bg-black/20 dark:hover:bg-white/20";
-
-  const unselectedStyle =
-    "px-2 py-1 rounded-md font-thin cursor-pointer transition-colors duration-300 " +
-    "text-black dark:text-white " +
-    "hover:bg-black/10 dark:hover:bg-white/10 " +
-    "hover:backdrop-blur-md";
   return (
-    <header className="flex justify-between mt-12 items-center">
-      <div className="dark:text-white font-bold font-mono">habits</div>
-      <div className="flex items-center gap-2">
-        <ul className="flex justify-between gap-2">
-          {links.map((route, index) => {
-            return (
-              <li
+    <header className="mt-6 flex flex-wrap items-center justify-between gap-3 md:mt-12 md:gap-6">
+      <div className="flex items-center gap-2 text-lg font-semibold tracking-tight md:text-xl">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="border border-border/50 bg-background/60 md:hidden"
+              aria-label="Open navigation"
+            >
+              <Menu className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="min-w-[160px]">
+            {links.map((route) => (
+              <DropdownMenuItem
+                key={route}
+                onSelect={() => linkHandler(route)}
                 className={clsx(
-                  "cursor-pointer transition-colors duration-300",
-                  state.route === route ? selectedStyle : unselectedStyle
+                  "capitalize",
+                  state.route === route && "bg-muted font-semibold text-foreground"
                 )}
-                key={index}
-                onClick={() => linkHandler(route)}
               >
                 {route}
-              </li>
-            );
-          })}
-        </ul>
-        <Button>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <span className="font-mono lowercase text-foreground">habits</span>
+      </div>
+
+      <nav className="order-3 hidden w-full items-center justify-center gap-2 md:order-none md:flex md:w-auto">
+        {links.map((route) => (
+          <button
+            key={route}
+            type="button"
+            onClick={() => linkHandler(route)}
+            className={clsx(
+              "rounded-md px-3 py-1.5 text-sm capitalize transition",
+              "hover:bg-muted/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+              state.route === route
+                ? "bg-muted text-foreground shadow-sm"
+                : "text-muted-foreground"
+            )}
+          >
+            {route}
+          </button>
+        ))}
+      </nav>
+
+      <div className="flex flex-1 flex-wrap items-center justify-end gap-2 md:flex-none md:flex-nowrap">
+        <WorkspaceMenu />
+        <BackupMenu />
+        <ThemeToggle />
+        <Button
+          onClick={onCreateRequest}
+          className="w-full capitalize sm:w-auto md:min-w-[150px]"
+        >
           <PlusIcon className="h-4 w-4" />
           create habit
         </Button>
-        <ThemeToggle />
       </div>
     </header>
   );

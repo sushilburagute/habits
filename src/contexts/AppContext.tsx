@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useReducer } from "react";
 
-export type Route = "home" | "today" | "week" | "overall";
+export type Route = "home" | "today" | "week" | "overall" | "stats";
 
 export type AppState = {
   route: Route;

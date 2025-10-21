@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { onDBEvent } from "../db/sync";
-import { getAllHabits, getMonthMap, computeStreaks, getAllToday } from "../db/repo";
+import { getAllHabits, getMonthMap, computeStreaks, getAllToday, getRangeMap } from "../db/repo";
 import type { Habit, HabitId } from "../db/database.type";
+import { localDayISO } from "../db/time";
 
 export function useHabits(): Array<Habit> {
   const [list, setList] = useState<Array<Habit>>([]);
@@ -68,4 +69,23 @@ export function useTodaySummary() {
     };
   }, []);
   return rows;
+}
+
+export function useRangeMap(habitId: HabitId, start: Date, end: Date) {
+  const [map, setMap] = useState<Record<string, number>>({});
+  const startISO = localDayISO(start);
+  const endISO = localDayISO(end);
+  useEffect(() => {
+    let mounted = true;
+    getRangeMap(habitId, startISO, endISO).then((m) => mounted && setMap(m));
+    const off = onDBEvent("tick:changed", (key) => {
+      if (key.startsWith(`${habitId}:`))
+        getRangeMap(habitId, startISO, endISO).then((m) => mounted && setMap(m));
+    });
+    return () => {
+      mounted = false;
+      off();
+    };
+  }, [habitId, startISO, endISO]);
+  return map;
 }

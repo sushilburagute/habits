@@ -13,6 +13,7 @@ export async function createHabit(
     name: input.name.trim(),
     color: input.color,
     targetPerDay: input.targetPerDay,
+    sortOrder: now,
     createdAt: now,
     updatedAt: now,
   };
@@ -76,6 +77,45 @@ export async function getAllToday() {
   const range = IDBKeyRange.bound([today, ""], [today, "\uffff"]);
   const rows = await db.transaction("ticks").store.index("byDateHabit").getAll(range);
   return rows.map((r) => ({ habitId: r.habitId, count: r.count }));
+}
+
+export async function getRangeMap(
+  habitId: HabitId,
+  start: ISODateDay,
+  end: ISODateDay
+): Promise<Record<ISODateDay, number>> {
+  const db = await getDB();
+  const range = IDBKeyRange.bound([habitId, start], [habitId, end]);
+  const rows = await db.transaction("ticks").store.index("byHabitDate").getAll(range);
+  const map: Record<ISODateDay, number> = {};
+  for (const row of rows) {
+    map[row.date] = row.count;
+  }
+  return map;
+}
+
+export async function getAllTicks(): Promise<Array<DailyTick>> {
+  const db = await getDB();
+  return db.getAll("ticks");
+}
+
+export async function resetWorkspace() {
+  const db = await getDB();
+  const tx = db.transaction(["habits", "ticks", "meta"], "readwrite");
+  await Promise.all([
+    tx.objectStore("habits").clear(),
+    tx.objectStore("ticks").clear(),
+    tx.objectStore("meta").clear(),
+  ]);
+  await tx.objectStore("meta").put({
+    key: "app-habits",
+    dbVersion: 1,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  });
+  await tx.done;
+  emitDBEvent("habit:created", "workspace:reset");
+  emitDBEvent("habit:updated", "workspace:reset");
+  emitDBEvent("tick:changed", "workspace:reset");
 }
 
 // Streaks
