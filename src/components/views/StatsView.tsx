@@ -3,7 +3,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import { Award, CalendarDays, Flame, Target, TrendingUp } from "lucide-react";
 
 import { useHabits } from "@/hooks/useDB";
-import { useStatsSummary } from "@/hooks/useStats";
+import { type StatsSummary, useStatsSummary } from "@/hooks/useStats";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -72,6 +72,8 @@ export function StatsView({ onCreateRequest }: StatsViewProps) {
           <MetricCard key={metric.title} {...metric} />
         ))}
       </section>
+
+      <InsightTimelineCard timeline={summary.timeline} />
 
       {summary.longestStreak && (
         <Card className="border border-amber-400/40 bg-amber-500/10 text-amber-900 dark:bg-amber-400/10 dark:text-amber-100">
@@ -181,4 +183,136 @@ function MetricCard({ title, value, description, icon: Icon }: MetricCardProps) 
 
 function dateFromISO(iso: string) {
   return new Date(`${iso}T00:00:00`);
+}
+
+type InsightTimelineCardProps = {
+  timeline: StatsSummary["timeline"];
+};
+
+function InsightTimelineCard({ timeline }: InsightTimelineCardProps) {
+  const recentWeeks = timeline.weeks.slice(-4).reverse();
+  const recentMonths = timeline.months.slice(-4).reverse();
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Insight timeline</CardTitle>
+        <CardDescription>
+          Week-over-week and month-over-month momentum plus streak alerts for habits that need attention.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="grid gap-6 lg:grid-cols-2">
+          <TrendList title="Week over week" points={recentWeeks} kind="week" />
+          <TrendList title="Month over month" points={recentMonths} kind="month" />
+        </div>
+        <div className="space-y-3">
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Streak watch</h4>
+          {timeline.atRisk.length === 0 ? (
+            <p className="text-sm text-muted-foreground">All habits are caught up for today. Keep the momentum going!</p>
+          ) : (
+            <ul className="space-y-2">
+              {timeline.atRisk.map((entry) => (
+                <li key={entry.habit.id} className="rounded-lg border border-border/60 bg-muted/40 p-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-sm font-semibold text-foreground">{entry.habit.name}</p>
+                    <Badge variant="secondary">{entry.streakLength} day streak</Badge>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {entry.lastMarkedOn
+                      ? `Last mark ${formatDistanceToNow(dateFromISO(entry.lastMarkedOn), { addSuffix: true })}.`
+                      : "Track this habit today to build a streak."}{" "}
+                    Log today to keep it alive.
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+type TrendListProps = {
+  title: string;
+  points: Array<StatsSummary["timeline"]["weeks"][number]>;
+  kind: "week" | "month";
+};
+
+function TrendList({ title, points, kind }: TrendListProps) {
+  if (points.length === 0) {
+    return (
+      <div>
+        <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{title}</h4>
+        <p className="mt-2 text-sm text-muted-foreground">No activity logged yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{title}</h4>
+      <ul className="space-y-2">
+        {points.map((point) => {
+          const label =
+            kind === "week" ? formatWeekRange(point.start, point.end) : formatMonthLabel(point.start);
+          const deltaCopy = formatDelta(point.delta);
+          const deltaClass = getDeltaClass(point.delta);
+
+          return (
+            <li key={point.period} className="rounded-lg border border-border/60 bg-muted/40 px-4 py-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{label}</p>
+                  <p className="text-xs text-muted-foreground">{deltaCopy}</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-lg font-semibold text-foreground">
+                    {numberFormatter.format(point.total)}
+                  </span>
+                  <span className={`block text-xs ${deltaClass}`}>{formatDeltaSimple(point.delta)}</span>
+                </div>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+function formatWeekRange(startISO: string, endISO: string) {
+  const start = dateFromISO(startISO);
+  const end = dateFromISO(endISO);
+  const sameMonth = start.getMonth() === end.getMonth();
+  const startLabel = format(start, "MMM d");
+  const endLabel = sameMonth ? format(end, "d") : format(end, "MMM d");
+  return `${startLabel} - ${endLabel}`;
+}
+
+function formatMonthLabel(startISO: string) {
+  const start = dateFromISO(startISO);
+  return format(start, "MMMM yyyy");
+}
+
+function formatDelta(delta: number | null) {
+  if (delta === null) return "Baseline period";
+  if (delta > 0) return `Up ${numberFormatter.format(delta)} vs prior`;
+  if (delta < 0) return `Down ${numberFormatter.format(Math.abs(delta))} vs prior`;
+  return "No change vs prior period";
+}
+
+function formatDeltaSimple(delta: number | null) {
+  if (delta === null) return "-";
+  if (delta > 0) return `+${numberFormatter.format(delta)}`;
+  if (delta < 0) return `-${numberFormatter.format(Math.abs(delta))}`;
+  return "0";
+}
+
+function getDeltaClass(delta: number | null) {
+  if (delta === null) return "text-muted-foreground";
+  if (delta > 0) return "text-emerald-500";
+  if (delta < 0) return "text-rose-500";
+  return "text-muted-foreground";
 }
