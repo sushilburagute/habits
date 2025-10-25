@@ -22,7 +22,7 @@ type TimelinePoint = {
 type AtRiskEntry = {
   habit: Habit;
   streakLength: number;
-  lastMarkedOn?: string;
+  lastMarkedOn: string;
   daysSinceLast: number;
 };
 
@@ -261,7 +261,7 @@ function computeTimeline({
         daysSinceLast,
       };
     })
-    .filter((entry): entry is AtRiskEntry => Boolean(entry))
+    .filter((entry): entry is AtRiskEntry => entry !== undefined)
     .sort((a, b) => {
       if (b.streakLength !== a.streakLength) return b.streakLength - a.streakLength;
       if (a.lastMarkedOn && b.lastMarkedOn) return b.lastMarkedOn.localeCompare(a.lastMarkedOn);
