@@ -54,8 +54,20 @@ export async function setTick(habitId: HabitId, day: ISODateDay, value: number) 
 export async function toggleToday(habitId: HabitId) {
   const day = localDayISO(new Date());
   const db = await getDB();
-  const existing = await db.get("ticks", [habitId, day]);
-  const next = existing && existing.count > 0 ? 0 : 1;
+  const [existing, habit] = await Promise.all([
+    db.get("ticks", [habitId, day]),
+    db.get("habits", habitId),
+  ]);
+  const target =
+    typeof habit?.targetPerDay === "number" && habit.targetPerDay > 0 ? habit.targetPerDay : 1;
+  let next: number;
+  if (!existing || existing.count <= 0) {
+    next = 1;
+  } else if (existing.count >= target) {
+    next = 0;
+  } else {
+    next = existing.count + 1;
+  }
   await setTick(habitId, day, next);
   return next;
 }

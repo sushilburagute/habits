@@ -54,18 +54,24 @@ const EMPTY_SUMMARY: StatsSummary = {
 
 export function useStatsSummary(habits: Array<Habit>) {
   const [summary, setSummary] = useState<StatsSummary>(EMPTY_SUMMARY);
+  const [isLoading, setIsLoading] = useState(true);
 
   const habitKey = useMemo(() => habits.map((h) => h.id).join("|"), [habits]);
 
   useEffect(() => {
     let mounted = true;
+    let isInitialLoad = true;
 
     async function recompute() {
       if (!mounted) return;
       if (!habits.length) {
         setSummary(EMPTY_SUMMARY);
+        setIsLoading(false);
+        isInitialLoad = false;
         return;
       }
+
+      if (isInitialLoad) setIsLoading(true);
 
       const [ticks, streaks] = await Promise.all([
         getAllTicks(),
@@ -153,6 +159,8 @@ export function useStatsSummary(habits: Array<Habit>) {
         lastEntryDate,
         timeline,
       });
+      setIsLoading(false);
+      isInitialLoad = false;
     }
 
     void recompute();
@@ -169,7 +177,7 @@ export function useStatsSummary(habits: Array<Habit>) {
     };
   }, [habitKey, habits]);
 
-  return summary;
+  return { summary, isLoading };
 }
 
 function computeTimeline({

@@ -1,13 +1,24 @@
 import { useHabits } from "@/hooks/useDB";
 import { HabitCard } from "@/components/HabitCard";
 import { NoHabitsPlaceholder } from "@/components/NoHabitsPlaceholder";
+import { HabitCardSkeleton } from "@/components/HabitCardSkeleton";
 
 type WeekViewProps = {
   onCreateRequest: () => void;
 };
 
 export function WeekView({ onCreateRequest }: WeekViewProps) {
-  const habits = useHabits();
+  const { habits, isLoading } = useHabits();
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <HabitCardSkeleton key={index} />
+        ))}
+      </div>
+    );
+  }
 
   if (habits.length === 0) {
     return (

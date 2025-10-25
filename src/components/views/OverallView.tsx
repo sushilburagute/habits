@@ -1,15 +1,26 @@
 import { useHabits } from "@/hooks/useDB";
 import { HabitCard } from "@/components/HabitCard";
 import { NoHabitsPlaceholder } from "@/components/NoHabitsPlaceholder";
+import { HabitCardSkeleton } from "@/components/HabitCardSkeleton";
 
 type OverallViewProps = {
   onCreateRequest: () => void;
 };
 
 export function OverallView({ onCreateRequest }: OverallViewProps) {
-  const habits = useHabits();
+  const { habits, isLoading } = useHabits();
   const today = new Date();
   const startOfYear = new Date(today.getFullYear(), 0, 1);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <HabitCardSkeleton key={index} />
+        ))}
+      </div>
+    );
+  }
 
   if (habits.length === 0) {
     return (

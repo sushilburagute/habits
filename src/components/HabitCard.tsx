@@ -46,6 +46,16 @@ export function HabitCard({
   }, [celebrating]);
 
   const palette = HABIT_COLOR_CONFIG[habit.color];
+  const target = useMemo(
+    () => (typeof habit.targetPerDay === "number" && habit.targetPerDay > 0 ? habit.targetPerDay : 1),
+    [habit.targetPerDay]
+  );
+  useEffect(() => {
+    if (todayCount < target) {
+      setCelebrating(false);
+    }
+  }, [todayCount, target]);
+
   const streakCopy = useMemo(() => {
     if (current === 0) return "No streak yet";
     if (current === 1) return "1 day streak";
@@ -57,17 +67,15 @@ export function HabitCard({
     try {
       const next = await toggleToday(habit.id);
       setLocalCount(next);
-      if (next > 0) {
-        setCelebrating(true);
-      } else {
-        setCelebrating(false);
-      }
+      setCelebrating(target > 0 && next >= target);
     } finally {
       setIsToggling(false);
     }
   };
 
-  const targetDisplay = habit.targetPerDay ? `${habit.targetPerDay}/day target` : "1/day target";
+  const targetDisplay = `${Number.isInteger(target) ? target : target.toString()}/day target`;
+  const hasProgress = localCount > 0;
+  const isComplete = localCount >= target;
 
   return (
     <Card className="relative overflow-hidden">
@@ -93,16 +101,21 @@ export function HabitCard({
           </CardDescription>
         </div>
         {showToggle && (
-          <Button onClick={handleToggle} disabled={isToggling} variant={localCount > 0 ? "outline" : "default"}>
+          <Button onClick={handleToggle} disabled={isToggling} variant={isComplete ? "outline" : "default"}>
             {isToggling ? (
               <>
                 <RefreshCcw className="h-4 w-4 animate-spin" />
                 updating…
               </>
-            ) : localCount > 0 ? (
+            ) : isComplete ? (
               <>
                 <PartyPopper className="h-4 w-4 text-emerald-400" />
-                logged today
+                target met
+              </>
+            ) : hasProgress ? (
+              <>
+                <PartyPopper className="h-4 w-4" />
+                log progress
               </>
             ) : (
               <>
@@ -119,7 +132,7 @@ export function HabitCard({
             <span>
               Today:{" "}
               <span className="font-semibold text-foreground">
-                {localCount} / {habit.targetPerDay ?? 1}
+                {localCount} / {target}
               </span>
             </span>
             <span className="sm:hidden">{targetDisplay}</span>

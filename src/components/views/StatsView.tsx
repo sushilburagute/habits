@@ -7,6 +7,7 @@ import { type StatsSummary, useStatsSummary } from "@/hooks/useStats";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { NoHabitsPlaceholder } from "@/components/NoHabitsPlaceholder";
 
 type StatsViewProps = {
@@ -16,8 +17,13 @@ type StatsViewProps = {
 const numberFormatter = new Intl.NumberFormat("en-US");
 
 export function StatsView({ onCreateRequest }: StatsViewProps) {
-  const habits = useHabits();
-  const summary = useStatsSummary(habits);
+  const { habits, isLoading: habitsLoading } = useHabits();
+  const { summary, isLoading: summaryLoading } = useStatsSummary(habits);
+  const isLoading = habitsLoading || summaryLoading;
+
+  if (isLoading) {
+    return <StatsViewSkeleton />;
+  }
 
   if (!habits.length) {
     return (
@@ -278,6 +284,58 @@ function TrendList({ title, points, kind }: TrendListProps) {
           );
         })}
       </ul>
+    </div>
+  );
+}
+
+function StatsViewSkeleton() {
+  return (
+    <div className="space-y-8">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <Card key={`metric-skeleton-${index}`} className="border border-border/60 bg-background/70 backdrop-blur">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-5 w-5 rounded-full" />
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Skeleton className="h-8 w-16" />
+              <Skeleton className="h-4 w-32" />
+            </CardContent>
+          </Card>
+        ))}
+      </section>
+
+      <Card>
+        <CardHeader className="space-y-2">
+          <Skeleton className="h-5 w-44" />
+          <Skeleton className="h-4 w-72" />
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <Skeleton key={`timeline-skeleton-${index}`} className="h-16 w-full rounded-lg" />
+          ))}
+        </CardContent>
+      </Card>
+
+      <Card className="border border-amber-400/40 bg-amber-500/10 text-amber-900 dark:bg-amber-400/10 dark:text-amber-100">
+        <CardHeader className="space-y-3">
+          <Skeleton className="h-5 w-40" />
+          <Skeleton className="h-4 w-56" />
+        </CardHeader>
+      </Card>
+
+      <Card>
+        <CardHeader className="space-y-2">
+          <Skeleton className="h-5 w-48" />
+          <Skeleton className="h-4 w-64" />
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Skeleton key={`leaderboard-skeleton-${index}`} className="h-14 w-full rounded-lg" />
+          ))}
+        </CardContent>
+      </Card>
     </div>
   );
 }

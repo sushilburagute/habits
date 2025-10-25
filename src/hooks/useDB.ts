@@ -4,24 +4,30 @@ import { getAllHabits, getMonthMap, computeStreaks, getAllToday, getRangeMap } f
 import type { Habit, HabitId } from "../db/database.type";
 import { localDayISO } from "../db/time";
 
-export function useHabits(): Array<Habit> {
-  const [list, setList] = useState<Array<Habit>>([]);
+export function useHabits(): { habits: Array<Habit>; isLoading: boolean } {
+  const [habits, setHabits] = useState<Array<Habit>>([]);
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     let mounted = true;
-    getAllHabits().then((r) => mounted && setList(r));
-    const off1 = onDBEvent("habit:created", () =>
-      getAllHabits().then((r) => mounted && setList(r))
-    );
-    const off2 = onDBEvent("habit:updated", () =>
-      getAllHabits().then((r) => mounted && setList(r))
-    );
+    let isInitialLoad = true;
+    const load = async () => {
+      if (isInitialLoad) setIsLoading(true);
+      const list = await getAllHabits();
+      if (!mounted) return;
+      setHabits(list);
+      setIsLoading(false);
+      isInitialLoad = false;
+    };
+    void load();
+    const off1 = onDBEvent("habit:created", () => void load());
+    const off2 = onDBEvent("habit:updated", () => void load());
     return () => {
       mounted = false;
       off1();
       off2();
     };
   }, []);
-  return list;
+  return { habits, isLoading };
 }
 
 export function useMonthMap(habitId: HabitId, year: number, month1to12: number) {
@@ -59,16 +65,26 @@ export function useStreaks(habitId: HabitId) {
 
 export function useTodaySummary() {
   const [rows, setRows] = useState<Array<{ habitId: HabitId; count: number }>>([]);
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     let mounted = true;
-    getAllToday().then((r) => mounted && setRows(r));
-    const off = onDBEvent("tick:changed", () => getAllToday().then((r) => mounted && setRows(r)));
+    let isInitialLoad = true;
+    const load = async () => {
+      if (isInitialLoad) setIsLoading(true);
+      const result = await getAllToday();
+      if (!mounted) return;
+      setRows(result);
+      setIsLoading(false);
+      isInitialLoad = false;
+    };
+    void load();
+    const off = onDBEvent("tick:changed", () => void load());
     return () => {
       mounted = false;
       off();
     };
   }, []);
-  return rows;
+  return { rows, isLoading };
 }
 
 export function useRangeMap(habitId: HabitId, start: Date, end: Date) {
