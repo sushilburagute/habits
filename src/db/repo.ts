@@ -72,6 +72,18 @@ export async function toggleToday(habitId: HabitId) {
   return next;
 }
 
+export async function decrementToday(habitId: HabitId) {
+  const day = localDayISO(new Date());
+  const db = await getDB();
+  const existing = await db.get("ticks", [habitId, day]);
+  if (!existing || existing.count <= 0) {
+    return 0;
+  }
+  const next = existing.count - 1;
+  await setTick(habitId, day, next);
+  return next;
+}
+
 export async function getMonthMap(habitId: HabitId, year: number, month1to12: number) {
   const start = `${year}-${String(month1to12).padStart(2, "0")}-01`;
   const end = localDayISO(new Date(year, month1to12, 0)); // last day of month
