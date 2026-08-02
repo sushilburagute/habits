@@ -45,6 +45,15 @@
   --sidebar-ring: oklch(0.709 0.01 56.259);
 }
 
+@theme {
+  /* Display face: set tight and heavy for headlines only. */
+  --font-display: "Segoe UI Variable Display", "SF Pro Display", ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Utility face: reserved for data - dates, counts, spans, labels. */
+  --font-mono: ui-monospace, "Cascadia Code", "SF Mono", "JetBrains Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -121,7 +130,82 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    /* Reserve the scrollbar on every route so the layout never shifts sideways
+       when moving between the landing page and the app. */
+    scrollbar-gutter: stable;
+  }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Landing page motion. Everything below is opt-in: with reduced motion the
+   page renders in its final state and only the paint interaction remains.
+   --------------------------------------------------------------------------- */
+
+@keyframes lp-cell-in {
+  from {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes lp-pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.6);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes lp-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.lp-cell {
+  transform-origin: center;
+}
+
+.lp-faq summary svg {
+  transition: transform 200ms ease;
+}
+
+.lp-faq[open] summary svg {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .lp-cell {
+    animation-name: lp-cell-in;
+    animation-duration: 420ms;
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1);
+    animation-fill-mode: both;
+  }
+
+  .lp-cell[data-painted="true"] {
+    animation-name: lp-pop;
+    animation-duration: 260ms;
+    animation-delay: 0ms !important;
+  }
+
+  .lp-rise {
+    animation: lp-rise 620ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
   }
 }

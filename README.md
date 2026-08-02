@@ -12,6 +12,7 @@ Habit Heatmap is an offline-first habit tracker for the browser. Visualize daily
 
 ## UI at a Glance
 
+- **Home** – the landing page first-time visitors see, with a paintable year heatmap, feature and privacy sections, PWA install steps, and an FAQ. Entering the app sets `habits:started` in localStorage so it is skipped afterwards; the header wordmark returns to it.
 - **Today** – toggle today's check-in, view a 28-day heatmap, and celebrate streak continuation.
 - **Week** – scan the last 12 weeks (84 days) of activity with cadence context.
 - **Overall** – review the current year's streak archive from January 1 through today.
@@ -33,6 +34,7 @@ Habit Heatmap is an offline-first habit tracker for the browser. Visualize daily
 src/
   App.tsx                # App shell wiring ThemeProvider + AppProvider + dashboard
   components/            # Feature components and shadcn-based UI primitives
+    landing/             # Landing page and its animated, paintable year grid
     views/               # Route-specific views (Today, Week, Overall, Stats)
   contexts/              # Global state providers (app route + theme)
   db/                    # IndexedDB schema, repo helpers, seed data, and sync event bus
@@ -76,7 +78,7 @@ Target Node.js 20 LTS or newer; Vite 7 will enforce modern ESM support.
 
 - The PWA manifest and service worker are configured in `vite.config.ts` via `vite-plugin-pwa`.
 - Run `yarn build` followed by `yarn preview` and open the preview URL to verify installability and offline behaviour in a fresh browser profile.
-- Runtime caching currently includes an example API origin (`api.example.com`); update this before shipping a production build.
+- Runtime caching covers image requests only. There is no remote origin to cache: the app talks to no server after load, and the landing page says so, so keep it that way unless that changes.
 
 ## Development Notes
 

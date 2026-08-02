@@ -80,16 +80,6 @@ const pwa: Partial<VitePWAOptions> = {
           expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 },
         },
       },
-      {
-        urlPattern: /^https:\/\/api\.example\.com\/.*/i, // your API origin
-        handler: "NetworkFirst",
-        options: {
-          cacheName: "api",
-          networkTimeoutSeconds: 3,
-          cacheableResponse: { statuses: [0, 200] },
-          expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 },
-        },
-      },
     ],
   },
 };

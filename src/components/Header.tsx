@@ -54,7 +54,14 @@ export const Header = ({ onCreateRequest }: HeaderProps) => {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-        <span className="font-mono lowercase text-foreground">habits</span>
+        <button
+          type="button"
+          onClick={() => linkHandler("home")}
+          className="rounded-sm font-mono lowercase text-foreground transition hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          habits
+          <span className="sr-only"> - back to the home page</span>
+        </button>
       </div>
 
       <nav className="order-3 hidden w-full items-center justify-center gap-2 md:order-none md:flex md:w-auto">

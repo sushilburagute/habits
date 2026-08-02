@@ -5,6 +5,7 @@ import type { Habit } from "@/db/database.type";
 import { useRangeMap } from "@/hooks/useDB";
 import { HABIT_COLOR_CONFIG } from "@/constants/colors";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { getCellBackground } from "@/lib/heatmap";
 import { cn } from "@/lib/utils";
 
 type HabitHeatmapProps = {
@@ -24,8 +25,6 @@ type HeatmapCell = {
   isToday: boolean;
   isFuture: boolean;
 };
-
-const LEVEL_ALPHAS = [0, 0.24, 0.5, 0.7, 0.9];
 
 export function HabitHeatmap({ habit, days, className, caption, startDate: overrideStart, endDate: overrideEnd }: HabitHeatmapProps) {
   const endDate = useMemo(() => {
@@ -122,22 +121,6 @@ export function HabitHeatmap({ habit, days, className, caption, startDate: overr
       <HeatmapLegend hex={palette.hex} target={habit.targetPerDay ?? 1} />
     </div>
   );
-}
-
-function getCellBackground(hex: string, level: number): string {
-  if (level <= 0) return "transparent";
-  const [r, g, b] = hexToRgb(hex);
-  const alpha = LEVEL_ALPHAS[level];
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
-function hexToRgb(hex: string): [number, number, number] {
-  const clean = hex.replace("#", "");
-  const bigint = Number.parseInt(clean, 16);
-  const r = (bigint >> 16) & 255;
-  const g = (bigint >> 8) & 255;
-  const b = bigint & 255;
-  return [r, g, b];
 }
 
 function alignToWeekStart(date: Date) {
